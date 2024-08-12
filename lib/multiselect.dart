@@ -142,8 +142,23 @@ class _DropDownMultiSelectState<TState>
   late final List<(int, TState)> selectedValues = [];
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    for (int i = 0; i < widget.options.length; i++) {
+      uniqueOptions.add((i, widget.options[i]));
+    }
+    if (widget.selectedValues.isNotEmpty) {
+      for (int i = 0; i < widget.options.length; i++) {
+        selectedValues.add((i, widget.selectedValues[i]));
+      }
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant DropDownMultiSelect<TState> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    uniqueOptions.clear();
+    selectedValues.clear();
     for (int i = 0; i < widget.options.length; i++) {
       uniqueOptions.add((i, widget.options[i]));
     }
