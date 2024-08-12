@@ -142,8 +142,8 @@ class _DropDownMultiSelectState<TState>
   late final List<(int, TState)> selectedValues = [];
 
   @override
-  void initState() {
-    super.initState();
+  void didChangeDependencies() {
+    super.didChangeDependencies();
     for (int i = 0; i < widget.options.length; i++) {
       uniqueOptions.add((i, widget.options[i]));
     }
