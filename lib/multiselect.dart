@@ -155,6 +155,21 @@ class _DropDownMultiSelectState<TState>
   }
 
   @override
+  void didUpdateWidget(covariant DropDownMultiSelect<TState> oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    uniqueOptions.clear();
+    selectedValues.clear();
+    for (int i = 0; i < widget.options.length; i++) {
+      uniqueOptions.add((i, widget.options[i]));
+    }
+    if (widget.selectedValues.isNotEmpty) {
+      for (int i = 0; i < widget.options.length; i++) {
+        selectedValues.add((i, widget.selectedValues[i]));
+      }
+    }
+  }
+
+  @override
   void dispose() {
     uniqueOptions.clear();
     selectedValues.clear();
