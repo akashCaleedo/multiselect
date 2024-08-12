@@ -147,26 +147,37 @@ class _DropDownMultiSelectState<TState>
     for (int i = 0; i < widget.options.length; i++) {
       uniqueOptions.add((i, widget.options[i]));
     }
-    if (widget.selectedValues.isNotEmpty) {
-      for (int i = 0; i < widget.options.length; i++) {
-        selectedValues.add((i, widget.selectedValues[i]));
+    for (var value in uniqueOptions) {
+      if (widget.selectedValues.contains(value.$2)) {
+        selectedValues.add(value);
       }
     }
   }
 
   @override
   void didUpdateWidget(covariant DropDownMultiSelect<TState> oldWidget) {
-    super.didUpdateWidget(oldWidget);
+    List<TState> newSelectedValues = [];
     uniqueOptions.clear();
-    selectedValues.clear();
     for (int i = 0; i < widget.options.length; i++) {
       uniqueOptions.add((i, widget.options[i]));
     }
-    if (widget.selectedValues.isNotEmpty) {
-      for (int i = 0; i < widget.options.length; i++) {
-        selectedValues.add((i, widget.selectedValues[i]));
+    for (var newSelected in widget.selectedValues) {
+      bool flag = false;
+      for (var value in selectedValues) {
+        if (value.$2 == newSelected) {
+          flag = true;
+        }
+      }
+      if (!flag) {
+        newSelectedValues.add(newSelected);
       }
     }
+    for (var value in uniqueOptions) {
+      if (newSelectedValues.contains(value.$2)) {
+        selectedValues.add(value);
+      }
+    }
+    super.didUpdateWidget(oldWidget);
   }
 
   @override
@@ -261,11 +272,9 @@ class _DropDownMultiSelectState<TState>
                   child: Padding(
                     padding: const EdgeInsets.only(right: 20),
                     child: Text(
-                      widget.selectedValues.length > 0
-                          ? widget.selectedValues
-                              .map((e) => e.toString())
-                              .reduce(
-                                  (a, b) => a.toString() + ' , ' + b.toString())
+                      selectedValues.length > 0
+                          ? selectedValues.map((e) => e.$2.toString()).reduce(
+                              (a, b) => a.toString() + ' , ' + b.toString())
                           : widget.whenEmpty ?? '',
                       style: widget.selectedValuesStyle
                           ?.copyWith(overflow: TextOverflow.ellipsis),

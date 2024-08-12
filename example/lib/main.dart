@@ -66,44 +66,53 @@ class MyHomePage extends StatefulWidget {
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  List<String> selected = [];
+  List<String> selected = ['d'];
+  List<String> options = [
+    'Select 1',
+    'b',
+    'c',
+    'd',
+    'Select 1',
+    'Select 1',
+    'Select 1',
+    'Select 1',
+    'Select 1',
+    'Select 1',
+    'Select 1',
+    'Select 1',
+    'd',
+    'Select 1',
+    'Select 1',
+  ];
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+        floatingActionButton: FloatingActionButton(onPressed: () {
+          setState(() {
+            selected.add("selected 3");
+            options.add("selected 3");
+            options.add("selected 3");
+          });
+        }),
         body: Center(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        // DropDownMultiSelect comes from multiselect
-        child: DropDownMultiSelect(
-          selectedValuesStyle: const TextStyle(
-              color: Colors.white, overflow: TextOverflow.ellipsis),
-          onChanged: (List<String> x) {
-            setState(() {
-              selected = x;
-            });
-            log(selected.toString(), name: "MultiSelect");
-          },
-          options: const [
-            'Select 1',
-            'b',
-            'c',
-            'd',
-            'Select 1',
-            'Select 1',
-            'Select 1',
-            'Select 1',
-            'Select 1',
-            'Select 1',
-            'Select 1',
-            'Select 1',
-            'Select 1',
-            'Select 1',
-          ],
-          selectedValues: selected,
-          whenEmpty: 'Select Something',
-        ),
-      ),
-    ));
+          child: Padding(
+            padding: const EdgeInsets.all(20.0),
+            // DropDownMultiSelect comes from multiselect
+            child: DropDownMultiSelect(
+              selectedValuesStyle: const TextStyle(
+                  color: Colors.white, overflow: TextOverflow.ellipsis),
+              onChanged: (List<String> x) {
+                setState(() {
+                  selected = x;
+                });
+                log(selected.toString(), name: "MultiSelect");
+              },
+              options: options,
+              selectedValues: selected,
+              whenEmpty: 'Select Something',
+            ),
+          ),
+        ));
   }
 }
