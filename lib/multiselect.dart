@@ -1,9 +1,7 @@
 library multiselect;
 
-
 import 'package:flutter/material.dart';
 import 'package:states_rebuilder/states_rebuilder.dart';
-
 
 class _TheState {}
 
@@ -29,7 +27,12 @@ class _SelectRow extends StatelessWidget {
   final bool selected;
   final String text;
 
-  const _SelectRow({Key? key, required this.onChange, required this.selected, required this.text}) : super(key: key);
+  const _SelectRow({
+    Key? key,
+    required this.onChange,
+    required this.selected,
+    required this.text,
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -89,7 +92,7 @@ class DropDownMultiSelect<T> extends StatefulWidget {
   final Widget Function(T option)? menuItembuilder;
 
   /// a function to validate
-  final String Function(T? selectedOptions)? validator;
+  final String Function(int? selectedOptions)? validator;
 
   /// defines whether the widget is read-only
   final bool readOnly;
@@ -105,6 +108,7 @@ class DropDownMultiSelect<T> extends StatefulWidget {
 
   /// selectedValue separator
   final String separator;
+
   /// style for the selected values
   final TextStyle? selectedValuesStyle;
 
@@ -132,30 +136,39 @@ class DropDownMultiSelect<T> extends StatefulWidget {
   _DropDownMultiSelectState createState() => _DropDownMultiSelectState<T>();
 }
 
-class _DropDownMultiSelectState<TState> extends State<DropDownMultiSelect<TState>> {
+class _DropDownMultiSelectState<TState>
+    extends State<DropDownMultiSelect<TState>> {
+  late final List<(int, TState)> uniqueOptions = [];
+  late final List<(int, TState)> selectedValues = [];
+
+  @override
+  void initState() {
+    super.initState();
+    for (int i = 0; i < widget.options.length; i++) {
+      uniqueOptions.add((i, widget.options[i]));
+    }
+    if (widget.selectedValues.isNotEmpty) {
+      for (int i = 0; i < widget.options.length; i++) {
+        selectedValues.add((i, widget.selectedValues[i]));
+      }
+    }
+  }
+
+  @override
+  void dispose() {
+    uniqueOptions.clear();
+    selectedValues.clear();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
     return Container(
       child: Stack(
         alignment: Alignment.centerLeft,
         children: [
-          _theState.rebuild(() => widget.childBuilder != null
-              ? widget.childBuilder!(widget.selectedValues)
-              : Padding(
-                  padding:
-                      widget.decoration !=null ? widget.decoration!.contentPadding !=null ? widget.decoration!.contentPadding! : EdgeInsets.symmetric(horizontal: 10) : EdgeInsets.symmetric(horizontal: 10),
-                  child: Padding(
-                    
-                    padding: const EdgeInsets.only(right: 20),
-                    child: Text(widget.selectedValues.length > 0
-                        ? widget.selectedValues
-                            .reduce((a, b) => a + widget.separator + b)
-                        : widget.whenEmpty ?? ''),
-                  ))),
-
-         
           Container(
-            child: DropdownButtonFormField<TState>(
+            child: DropdownButtonFormField<int>(
               hint: widget.hint,
               style: widget.hintStyle,
               icon: widget.icon,
@@ -165,55 +178,55 @@ class _DropDownMultiSelectState<TState> extends State<DropDownMultiSelect<TState
                   : InputDecoration(
                       border: OutlineInputBorder(),
                       isDense: true,
-                      contentPadding: EdgeInsets.symmetric(
-                        vertical: 15,
-                        horizontal: 10,
-                      ),
+                      contentPadding:
+                          EdgeInsets.symmetric(vertical: 15, horizontal: 10),
                     ),
               isDense: widget.isDense,
               onChanged: widget.enabled ? (x) {} : null,
               isExpanded: false,
-              value: widget.selectedValues.length > 0 ? widget.selectedValues[0] : null,
+              value: selectedValues.isNotEmpty ? selectedValues[0].$1 : null,
               selectedItemBuilder: (context) {
-                return widget.options
-                    .map((e) => DropdownMenuItem(
-                          child: Container(),
-                        ))
+                return uniqueOptions
+                    .map((e) => DropdownMenuItem(child: Container()))
                     .toList();
               },
-              items: widget.options
+              items: uniqueOptions
                   .map(
-                    (x) => DropdownMenuItem<TState>(
+                    (x) => DropdownMenuItem<int>(
                       child: _theState.rebuild(() {
                         return widget.menuItembuilder != null
-                            ? widget.menuItembuilder!(x)
+                            ? widget.menuItembuilder!(x.$2)
                             : _SelectRow(
-                                selected: widget.selectedValues.contains(x),
-                                text: x.toString(),
+                                selected: selectedValues.contains(x),
+                                text: x.$2.toString(),
                                 onChange: (isSelected) {
                                   if (isSelected) {
-                                    var ns = widget.selectedValues;
+                                    var ns = selectedValues;
                                     ns.add(x);
-                                    widget.onChanged(ns);
+                                    widget.onChanged(List<TState>.generate(
+                                        ns.length, (index) => ns[index].$2));
                                   } else {
-                                    var ns = widget.selectedValues;
+                                    var ns = selectedValues;
                                     ns.remove(x);
-                                    widget.onChanged(ns);
+                                    widget.onChanged(List<TState>.generate(
+                                        ns.length, (index) => ns[index].$2));
                                   }
                                 },
                               );
                       }),
-                      value: x,
+                      value: x.$1,
                       onTap: !widget.readOnly
                           ? () {
-                              if (widget.selectedValues.contains(x)) {
-                                var ns = widget.selectedValues;
+                              if (selectedValues.contains(x)) {
+                                var ns = selectedValues;
                                 ns.remove(x);
-                                widget.onChanged(ns);
+                                widget.onChanged(List<TState>.generate(
+                                    ns.length, (index) => ns[index].$2));
                               } else {
-                                var ns = widget.selectedValues;
+                                var ns = selectedValues;
                                 ns.add(x);
-                                widget.onChanged(ns);
+                                widget.onChanged(List<TState>.generate(
+                                    ns.length, (index) => ns[index].$2));
                               }
                             }
                           : null,
@@ -233,8 +246,14 @@ class _DropDownMultiSelectState<TState> extends State<DropDownMultiSelect<TState
                   child: Padding(
                     padding: const EdgeInsets.only(right: 20),
                     child: Text(
-                      widget.selectedValues.length > 0 ? widget.selectedValues.map((e) => e.toString()).reduce((a, b) => a.toString() + ' , ' + b.toString()) : widget.whenEmpty ?? '',
-                      style: widget.selectedValuesStyle,
+                      widget.selectedValues.length > 0
+                          ? widget.selectedValues
+                              .map((e) => e.toString())
+                              .reduce(
+                                  (a, b) => a.toString() + ' , ' + b.toString())
+                          : widget.whenEmpty ?? '',
+                      style: widget.selectedValuesStyle
+                          ?.copyWith(overflow: TextOverflow.ellipsis),
                     ),
                   ))),
         ],
