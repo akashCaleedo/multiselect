@@ -276,8 +276,10 @@ class _DropDownMultiSelectState<TState>
                           ? selectedValues.map((e) => e.$2.toString()).reduce(
                               (a, b) => a.toString() + ' , ' + b.toString())
                           : widget.whenEmpty ?? '',
-                      style: widget.selectedValuesStyle
-                          ?.copyWith(overflow: TextOverflow.ellipsis),
+                      style: widget.selectedValuesStyle != null
+                          ? widget.selectedValuesStyle
+                              ?.copyWith(overflow: TextOverflow.ellipsis)
+                          : TextStyle(overflow: TextOverflow.ellipsis),
                     ),
                   ))),
         ],
